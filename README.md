@@ -2,44 +2,92 @@
 
 A framework for creating persistent, personality-driven AI dev teams as Claude skills.
 
-Each team is a squad of specialized subagents with distinct voices, opinions, and rivalries.
+Each team is a squad of specialized agents with distinct voices, opinions, and rivalries.
 They run together in a "team meeting" and give brutally honest, multi-perspective feedback
-on your software project — architecture, UX, security, QA, and more.
-
----
-
-## What This Is
-
-This repo contains the **process** for building a dev team skill — not a specific team.
-You interview your agents into existence, one character at a time, then ship them as a
-installable `.skill` file for Claude.
-
-The result: type `"team meeting"` and get a full room of specialists who know your codebase,
-argue with each other, and give you real opinions.
+on your project — architecture, UX, security, QA, and more.
 
 ---
 
 ## Quickstart
 
+### Option A: Interactive Builder (recommended)
+
+Install the `build-team` skill in Claude Code, then run:
+
+```
+/build-team
+```
+
+Claude will interview you about your project and each agent, then write all the files.
+
+### Option B: Manual
+
 ```bash
-# 1. Clone this repo
-git clone https://github.com/your-username/agent-team-builder
-cd agent-team-builder
-
-# 2. Read the interview guide
-cat interview/questions.md
-
-# 3. Copy the team template
+# 1. Copy the team template
 cp -r template/ my-team/
 
-# 4. Fill in your agents (one file per agent)
-# See template/agents/_template.md for the format
+# 2. Read the interview guide, answer questions for each agent
+cat interview/questions.md
 
-# 5. Package as a .skill file
-python -m scripts.package_skill my-team/
+# 3. Fill in template/agents/_template.md for each agent
+# 4. Update template/SKILL.md with your team
 
-# 6. Install in Claude and say "team meeting"
+# 5. Install to your project
+cp -r my-team/ /path/to/project/.claude/skills/my-team/
 ```
+
+---
+
+## Installing the Builder Skill
+
+Copy `build-team.md` to your Claude skills directory:
+
+```bash
+# User-level (available in all projects)
+cp build-team.md ~/.claude/skills/build-team.md
+
+# Project-level
+cp build-team.md /path/to/project/.claude/skills/build-team.md
+```
+
+Then in Claude Code: `/build-team`
+
+---
+
+## What You Get
+
+After running the builder (or filling templates manually), you have:
+
+```
+my-team/
+├── SKILL.md              ← The team room — loads all agents, defines meeting format
+└── agents/
+    ├── foreman.md        ← Lead: opens and closes every meeting
+    ├── agent-2.md
+    ├── agent-3.md
+    ├── agent-4.md
+    └── agent-5.md
+```
+
+Install to your project:
+```bash
+cp -r my-team/ .claude/skills/my-team/
+```
+
+Then say **"team meeting"** to run it.
+
+---
+
+## The Team Meeting
+
+When you say **"team meeting"**, your agents run in sequence:
+
+- **Lead** opens with agenda, closes with named action items
+- **Specialists** give their domain take, interrupt when something is wrong
+- **Alliances** form along principled lines — shared philosophy, not just friendliness
+- **No one defers** to you for decisions they can make themselves
+
+The speaking order flexes based on topic. The lead always speaks first and last.
 
 ---
 
@@ -48,84 +96,60 @@ python -m scripts.package_skill my-team/
 ```
 agent-team-builder/
 ├── README.md                        ← You are here
+├── build-team.md                    ← Interactive builder skill for Claude
 ├── interview/
-│   └── questions.md                 ← Character creator interview guide
+│   └── questions.md                 ← Character creator interview guide (manual use)
 ├── template/
-│   ├── SKILL.md                     ← Team room template (copy & customize)
+│   ├── SKILL.md                     ← Team room template
 │   └── agents/
 │       └── _template.md             ← Single agent template
-├── examples/
-│   └── cloudblocks-sample/          ← Example: AWS app dev team
-│       ├── SKILL.md
-│       └── agents/
-│           ├── foreman.md
-│           ├── backend.md
-│           ├── frontend.md
-│           ├── product-ux.md
-│           ├── qa.md
-│           └── security.md
 ├── sprites/
 │   ├── README.md                    ← How sprites work
-│   └── archetypes/                  ← ASCII art for common roles
-│       ├── foreman.txt
-│       ├── backend.txt
-│       ├── frontend.txt
-│       ├── product-ux.txt
-│       ├── qa.txt
-│       └── security.txt
-└── docs/
-    ├── how-it-works.md              ← Deep dive on skill architecture
-    ├── adding-agents.md             ← How to extend a team
-    └── publishing.md                ← How to share your team
+│   └── archetypes/
+│       └── foreman.txt              ← ASCII art for the Lead/Foreman role
+└── examples/
+    └── README.md                    ← Links to example teams
 ```
-
----
-
-## The Team Meeting Format
-
-When you say **"team meeting"**, your agents run in sequence:
-
-```
-🔨 [FOREMAN]     — Opens with agenda. Closes with action items.
-🔐 [SECURITY]    — Audits everything. Speaks early.
-⚙️  [BACKEND]    — Sees what breaks at scale. Interrupts freely.
-🎨 [FRONTEND]    — Owns the interface. Allied with Product.
-📐 [PRODUCT/UX]  — Future-focused. Challenges scope cuts.
-🧪 [QA]          — Last word before Foreman closes. Nothing ships without sign-off.
-```
-
-The order can flex based on topic — but Security always speaks early, QA always speaks last.
-
----
-
-## Sprites
-
-Agents can have ASCII art portraits that render in Claude Code (terminal) or SVG icons
-for web-based Claude interfaces. See `sprites/README.md` for how to attach sprites to agents.
 
 ---
 
 ## Design Principles
 
-- **One SKILL.md per team** — the "team room" that loads all agents
+- **One SKILL.md per team** — the team room loads all agents
 - **One file per agent** — each character is isolated and swappable
 - **Personalities create accountability** — agents check each other, not just you
-- **Names are yours to assign** — templates use placeholders like `[Foreman]`
+- **Names are yours** — templates use placeholders, the builder asks for yours
 - **Project context is baked in** — agents know your stack and give real advice
+- **5 agents is the sweet spot** — enough coverage, not too many voices
+
+---
+
+## Tips for Good Characters
+
+**Give them something to fight about.**
+The most useful agents have overlapping domains. Two agents who both claim ownership of the same thing catch more issues than either would alone.
+
+**Make the quiet ones quieter.**
+If one agent speaks rarely, make every word land. A QA who rarely speaks but always stops a bad decision is more valuable than someone who talks constantly.
+
+**Ground personalities in the stack.**
+"Worried about scale" is vague. "Worried about your DynamoDB scan without a limit at 1M items" is useful.
+
+**Alliances should be principled, not tribal.**
+Frontend and Product ally because they share a user-first philosophy — not just because they get along.
 
 ---
 
 ## Contributing
 
 PRs welcome for:
-- New agent archetypes (DevOps, Data Engineer, Legal/Compliance, etc.)
+- New agent archetypes (DevOps, Data Engineer, Legal/Compliance, ML, Mobile)
 - New sprite designs
-- Example teams for different stacks (mobile, ML pipeline, CLI tool, etc.)
+- Example teams for different stacks
 - Translations of the interview questions
 
 ---
 
 ## License
 
-MIT — build your team, ship your product, share the process.
-# agent-team-builder
+MIT
