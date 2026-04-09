@@ -91,6 +91,145 @@ The speaking order flexes based on topic. The lead always speaks first and last.
 
 ---
 
+## Example Meeting
+
+> **Project:** Helix — a SaaS task management tool (React + Node + PostgreSQL)
+>
+> **Team:** Rex (Tech Lead), Dani (Backend), Mio (Frontend/UX), Sam (Product), Pax (QA)
+>
+> **Topic:** Should we build auth in-house or use Auth0?
+
+---
+
+```
+  _______
+ |_______|
+ |  | |  |
+  \_| |_/
+   _| |_
+  /     \
+ |_______|
+  🔨 REX
+```
+
+**🔨 Rex — Opening**
+
+Real question here is build vs. buy for auth. Auth0 is $0 at our scale today and
+$2k/month at 10k MAU. Rolling our own means owning the security surface forever.
+I want Dani on the implementation cost, Sam on user impact, and Pax to tell us
+what we're actually signing up to test. Mio, if the login UX is going to be a
+problem either way, say it early.
+
+---
+
+```
+  /|  |\
+ / |  | \
+|  ----  |
+ \ |  | /
+  \|  |/
+  _|  |_
+ |______|
+  ⚙️ DANI
+```
+
+**⚙️ Dani — Backend**
+
+Auth0 at our tier gives us OAuth, MFA, magic links, and social login out of the
+box. Building equivalent coverage in-house is 3–4 weeks of engineering, and that
+estimate doesn't include the subtle stuff — token rotation, brute-force protection,
+account enumeration hardening. We'd also own every CVE that touches JWT or bcrypt
+from here on. The only real argument for in-house is if we need to store credentials
+on our infra for compliance — do we?
+
+---
+
+```
+ .-------.
+ | o   o |
+ |   ^   |
+ |  ___  |
+ '-------'
+  /     \
+ |_______|
+  🎨 MIO
+```
+
+**🎨 Mio — Frontend/UX**
+
+[Mio interjects]: The login UX question isn't neutral. Auth0's hosted pages are
+fine but they're a dead end for customization — every time product wants to tweak
+the flow we hit a wall. If we use Auth0, we need to commit to their Universal
+Login and own that tradeoff now, not discover it at the wrong moment.
+
+Auth0 gets us to launch faster and that matters. But the UX ceiling is real.
+Sam, is there a user research argument for owning the login experience fully?
+
+---
+
+```
+  _____
+ /     \
+| [===] |
+|  ___  |
+|_|   |_|
+  |   |
+  |___|
+  📐 SAM
+```
+
+**📐 Sam — Product**
+
+Allied with Mio on the UX ceiling concern. Login is the first thing a new user
+sees — "branded, frictionless onboarding" is on our roadmap and Auth0's hosted
+pages make that harder than it looks. That said, Dani's right that we don't have
+3–4 weeks. We're pre-Series A. Use Auth0 now with a clean abstraction layer so
+we can swap it out later. The abstraction is the investment, not the auth vendor.
+
+---
+
+```
+ _________
+|  _   _  |
+| |_| |_| |
+|  _____  |
+| |_____| |
+|_________|
+   |   |
+  _|___|_
+ |_______|
+  🧪 PAX
+```
+
+**🧪 Pax — QA**
+
+I'm not signing off on in-house auth for a v1. Full stop. The test surface for
+a hand-rolled auth system includes session fixation, CSRF, token expiry edge cases,
+concurrent login behavior, and password reset flows — none of that is trivial to
+cover. Auth0 gives us a tested, audited implementation. If we build our own, I need
+two extra weeks on the test plan and I'll still be nervous about it.
+
+[Pax interjects to Sam]: The abstraction layer is the right call. Make sure it
+wraps the token lifecycle, not just the login redirect. That's where the lock-in
+actually lives.
+
+---
+
+**🔨 Rex — Closing**
+
+Decision: Auth0 for launch. Sam and Mio are right that we need a clean abstraction —
+that's non-negotiable. Dani, design the auth interface so the vendor is an
+implementation detail. Mio, spike the Universal Login customization limits this
+week so we know exactly what we're constrained by. Pax, write a test plan against
+the abstraction layer, not the Auth0 API directly.
+
+Revisit in-house at 5k MAU or if a compliance requirement forces our hand.
+Action items: Dani owns abstraction design by Thursday. Mio owns UX spike by
+Friday. Pax owns test plan by end of next week.
+```
+
+---
+
 ## Repo Structure
 
 ```
