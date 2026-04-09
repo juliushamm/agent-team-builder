@@ -1,4 +1,4 @@
-# 🏗️ Agent Team Builder
+# Agent Team Builder
 
 A framework for creating persistent, personality-driven AI dev teams as Claude skills.
 
